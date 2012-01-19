@@ -98,7 +98,9 @@ ifndef CONFIG_ARCH_MSM8960
 ifndef CONFIG_ARCH_MSM8X60
 ifndef CONFIG_ARCH_APQ8064
 ifndef CONFIG_ARCH_MSMCOPPER
+ifndef CONFIG_ARCH_HTC
 	obj-y += nand_partitions.o
+endif
 endif
 endif
 endif
