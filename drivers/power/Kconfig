@@ -352,4 +352,13 @@ config PM8921_BMS
 	help
 	  Say Y here to enable support for pm8921 chip bms subdevice
 
+config TPS65200
+	tristate "TPS65200 Driver"
+	depends on I2C
+	help
+	  TPS65200 Switch charger implemented by HTC.
+	  This could enable battery driver to set
+	  Charging current 100mA~500mA or 500mA~1000mA
+	  by GPIO or Register
+
 endif # POWER_SUPPLY
