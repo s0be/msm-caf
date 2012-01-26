@@ -36,6 +36,16 @@
 #define RPC_VERSION_MAJOR_MASK 0x0fff0000
 #define RPC_VERSION_MINOR_MASK 0x0000ffff
 
+#define RPC_VERSION_MAJOR_OFFSET 16
+
+#define MSM_RPC_VERS(major, minor)					\
+	((uint32_t)((((major) << RPC_VERSION_MAJOR_OFFSET) &		\
+		RPC_VERSION_MAJOR_MASK) |				\
+	((minor) & RPC_VERSION_MINOR_MASK)))
+#define MSM_RPC_GET_MAJOR(vers) (((vers) & RPC_VERSION_MAJOR_MASK) >>	\
+					RPC_VERSION_MAJOR_OFFSET)
+#define MSM_RPC_GET_MINOR(vers) ((vers) & RPC_VERSION_MINOR_MASK)
+
 /* callback ID for NULL callback function is -1 */
 #define MSM_RPC_CLIENT_NULL_CB_ID 0xffffffff
 
