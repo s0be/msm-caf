@@ -49,7 +49,32 @@ static ssize_t enable_store(
 	return size;
 }
 
+static ssize_t voltage_level_show(struct device *dev, struct device_attribute *attr,
+		char *buf)
+{
+	struct timed_output_dev *tdev = dev_get_drvdata(dev);
+	int level = tdev->get_level(tdev);
+
+	return sprintf(buf, "%d\n", level);
+}
+
+static ssize_t voltage_level_store(
+		struct device *dev, struct device_attribute *attr,
+		const char *buf, size_t size)
+{
+	struct timed_output_dev *tdev = dev_get_drvdata(dev);
+	int value;
+
+	if (sscanf(buf, "%d", &value) != 1)
+		return -EINVAL;
+
+	tdev->set_level(tdev, value);
+
+	return size;
+}
+
 static DEVICE_ATTR(enable, S_IRUGO | S_IWUSR, enable_show, enable_store);
+static DEVICE_ATTR(voltage_level, S_IRUGO | S_IWUSR, voltage_level_show, voltage_level_store);
 
 static int create_timed_output_class(void)
 {
@@ -84,6 +109,12 @@ int timed_output_dev_register(struct timed_output_dev *tdev)
 	if (ret < 0)
 		goto err_create_file;
 
+	if (tdev->set_level && tdev->get_level) {
+		ret = device_create_file(tdev->dev, &dev_attr_voltage_level);
+		if (ret < 0)
+			goto err_create_file;
+	}
+
 	dev_set_drvdata(tdev->dev, tdev);
 	tdev->state = 0;
 	return 0;
@@ -100,6 +131,7 @@ EXPORT_SYMBOL_GPL(timed_output_dev_register);
 void timed_output_dev_unregister(struct timed_output_dev *tdev)
 {
 	device_remove_file(tdev->dev, &dev_attr_enable);
+	device_remove_file(tdev->dev, &dev_attr_voltage_level);
 	device_destroy(timed_output_class, MKDEV(0, tdev->index));
 	dev_set_drvdata(tdev->dev, NULL);
 }
