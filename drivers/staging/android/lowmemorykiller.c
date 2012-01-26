@@ -38,6 +38,8 @@
 #include <linux/memory.h>
 #include <linux/memory_hotplug.h>
 
+#define DEBUG_LEVEL_DEATHPENDING 6
+
 static uint32_t lowmem_debug_level = 2;
 static int lowmem_adj[6] = {
 	0,
@@ -80,6 +82,42 @@ task_notify_func(struct notifier_block *self, unsigned long val, void *data)
 		lowmem_deathpending = NULL;
 
 	return NOTIFY_OK;
+}
+
+static void dump_deathpending(struct task_struct *t_deathpending)
+{
+	struct task_struct *p;
+
+	if (lowmem_debug_level < DEBUG_LEVEL_DEATHPENDING)
+		return;
+
+	BUG_ON(!t_deathpending);
+	lowmem_print(DEBUG_LEVEL_DEATHPENDING, "deathpending %d (%s)\n",
+		t_deathpending->pid, t_deathpending->comm);
+
+	read_lock(&tasklist_lock);
+	for_each_process(p) {
+		struct mm_struct *mm;
+		struct signal_struct *sig;
+		int oom_adj;
+		int tasksize;
+
+		task_lock(p);
+		mm = p->mm;
+		sig = p->signal;
+		if (!mm || !sig) {
+			task_unlock(p);
+			continue;
+		}
+		oom_adj = sig->oom_adj;
+		tasksize = get_mm_rss(mm);
+		task_unlock(p);
+		lowmem_print(DEBUG_LEVEL_DEATHPENDING,
+			"  %d (%s), adj %d, size %d\n",
+			p->pid, p->comm,
+			oom_adj, tasksize);
+	}
+	read_unlock(&tasklist_lock);
 }
 
 #ifdef CONFIG_MEMORY_HOTPLUG
@@ -145,6 +183,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	 */
 	if (lowmem_deathpending &&
 	    time_before_eq(jiffies, lowmem_deathpending_timeout))
+		dump_deathpending(lowmem_deathpending);
 		return 0;
 
 	if (lowmem_adj_size < array_size)
