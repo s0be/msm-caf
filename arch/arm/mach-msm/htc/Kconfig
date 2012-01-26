@@ -1,0 +1,6 @@
+config MACH_HTC
+	bool "HTC"
+
+config MACH_HTC_MSM7X27
+	select MACH_HTC
+	bool "HTC MSM7X27"
