@@ -4,3 +4,11 @@ config MACH_HTC
 config MACH_HTC_MSM7X27
 	select MACH_HTC
 	bool "HTC MSM7X27"
+
+config MACH_MSM7X27_MARVEL
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	select MACH_HTC_MSM7X27
+	bool "MSM7x27 Marvel"
+	help
+	  Support for the HTC Marvel board

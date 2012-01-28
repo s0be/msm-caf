@@ -89,4 +89,44 @@
 
 #define MSM_STRONGLY_ORDERED_PAGE  0xFA0F0000
 
+#if defined(CONFIG_MACH_HTC_MSM7X27)
+
+#define MSM_SDC1_PHYS         0xA0400000
+#define MSM_SDC1_SIZE         SZ_4K
+#define MSM_SDC2_BASE         IOMEM(0xF800C000)
+#define MSM_SDC2_PHYS         0xA0500000
+#define MSM_SDC2_SIZE         SZ_4K
+#define MSM_SDC3_PHYS         0xA0600000
+#define MSM_SDC3_SIZE         SZ_4K
+#define MSM_SDC4_PHYS         0xA0700000
+#define MSM_SDC4_SIZE         SZ_4K
+
+#define MSM_I2C_PHYS          0xA9900000
+#define MSM_I2C_SIZE          SZ_4K
+
+#define MSM_HSUSB_PHYS        0xA0800000
+#define MSM_HSUSB_SIZE        SZ_4K
+
+#define MSM_PMDH_PHYS         0xAA600000
+#define MSM_PMDH_SIZE         SZ_4K
+
+#define MSM_EMDH_PHYS         0xAA700000
+#define MSM_EMDH_SIZE         SZ_4K
+
+#define MSM_MDP_PHYS          0xAA200000
+#define MSM_MDP_SIZE          0x000F0000
+
+#define MSM_UART1DM_PHYS      0xA0200000
+#define MSM_UART2DM_PHYS      0xA0300000
+
+#define MSM_TGPIO1_BASE       IOMEM(0xF8009000)
+#define MSM_TGPIO1_PHYS       0xA9000000
+#define MSM_TGPIO1_SIZE       SZ_4K
+
+/* KGSL GPU Memory for Adreno200 */
+#define MSM_GPU_REG_PHYS      0xA0000000
+#define MSM_GPU_REG_SIZE      0x00020000
+
+#endif /* CONFIG_MACH_HTC_MSM7X27 */
+
 #endif
