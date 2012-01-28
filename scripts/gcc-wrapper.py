@@ -40,6 +40,7 @@ import subprocess
 # force LANG to be set to en_US.UTF-8 to get consistent warnings.
 
 allowed_warnings = set([
+    "adsp.c:581",
     "alignment.c:720",
     "async.c:122",
     "async.c:270",
@@ -51,6 +52,9 @@ allowed_warnings = set([
     "drm_edid.c:1303",
     "eventpoll.c:1143",
     "f_mass_storage.c:3368",
+    "fusb300_udc.c:771",
+    "fusb300_udc.c:983",
+    "fusb300_udc.c:1032",
     "inode.c:72",
     "inode.c:73",
     "inode.c:74",
