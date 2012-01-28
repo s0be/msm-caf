@@ -185,4 +185,81 @@ struct msm_usb_host_platform_data {
 	struct clk *ebi1_clk;
 };
 
+#ifdef CONFIG_MACH_HTC
+
+#ifdef CONFIG_USB_FUNCTION
+/* matches a product ID to a list of enabled functions */
+struct msm_hsusb_product {
+	/* product ID for usb_device_descriptor.idProduct */
+	__u16 product_id;
+
+	/* bit mask of enabled usb_functions, matching ordering
+	** in msm_hsusb_platform_data.functions
+	*/
+	__u32 functions;
+};
+#endif /* CONFIG_USB_FUNCTION */
+
+struct msm_hsusb_platform_data {
+	/* hard reset the ULPI PHY */
+	void (*phy_reset)(void);
+	void (*phy_shutdown)(void);
+
+	/* (de)assert the reset to the usb core */
+	void (*hw_reset)(bool enable);
+
+	/* for notification when USB is connected or disconnected */
+	void (*usb_connected)(int);
+	/* 1 : uart, 0 : usb */
+	void (*usb_uart_switch)(int);
+	void (*config_usb_id_gpios)(bool enable);
+	void (*usb_hub_enable)(bool);
+	void (*serial_debug_gpios)(int);
+	int (*china_ac_detect)(void);
+	void (*disable_usb_charger)(void);
+	/* val, reg pairs terminated by -1 */
+	int *phy_init_seq;
+	void (*change_phy_voltage)(int);
+	int (*ldo_init) (int init);
+	int (*ldo_enable) (int enable);
+	int (*rpc_connect)(int);
+	/* 1 : mhl, 0 : usb */
+	void (*usb_mhl_switch)(bool);
+#ifdef CONFIG_USB_FUNCTION
+	/* USB device descriptor fields */
+	__u16 vendor_id;
+
+	/* Default product ID.
+	** This can be overridden dynamically based on the disabled
+	** state of the functions using the product_table.
+	*/
+	__u16 product_id;
+
+	__u16 version;
+	char *product_name;
+	char *manufacturer_name;
+
+	/* list of function drivers to bind to this configuration */
+	int num_functions;
+	char **functions;
+
+	/* if num_products is zero, then the default value in product_id
+	** is used for the configuration descriptor.
+	*/
+	int num_products;
+	struct msm_hsusb_product *products;
+#endif
+	char *serial_number;
+	int usb_id_pin_gpio;
+	int dock_pin_gpio;
+	int id_pin_irq;
+	bool enable_car_kit_detect;
+	__u8 accessory_detect;
+	__u8 use_microp_adc;
+	bool dock_detect;
+
+	int ac_9v_gpio;
+};
+#endif /* CONFIG_MACH_HTC */
+
 #endif
