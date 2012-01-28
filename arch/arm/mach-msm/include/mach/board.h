@@ -486,6 +486,46 @@ int msm_add_host(unsigned int host,
 #if defined(CONFIG_USB_FUNCTION_MSM_HSUSB) \
 	|| defined(CONFIG_USB_MSM_72K) || defined(CONFIG_USB_MSM_72K_MODULE)
 void msm_hsusb_set_vbus_state(int online);
+
+enum usb_connect_type {
+	CONNECT_TYPE_UNKNOWN = -1,
+	CONNECT_TYPE_NONE = 0,
+	CONNECT_TYPE_USB,
+	CONNECT_TYPE_AC,
+	CONNECT_TYPE_9V_AC,
+};
+
+/* START: add USB connected notify function */
+struct t_usb_status_notifier{
+	struct list_head notifier_link;
+	const char *name;
+	void (*func)(int cable_type);
+};
+	int usb_register_notifier(struct t_usb_status_notifier *);
+	static LIST_HEAD(g_lh_usb_notifier_list);
+
+/***********************************
+Direction: cable detect drvier -> battery driver or other
+***********************************/
+struct t_cable_status_notifier{
+	struct list_head cable_notifier_link;
+	const char *name;
+	void (*func)(int cable_type);
+};
+int cable_detect_register_notifier(struct t_cable_status_notifier *);
+static LIST_HEAD(g_lh_calbe_detect_notifier_list);
+
+/***********************************
+ Direction: sii9234 drvier -> cable detect driver
+***********************************/
+struct t_mhl_status_notifier{
+	struct list_head mhl_notifier_link;
+	const char *name;
+	void (*func)(bool isMHL, bool irq_enable);
+};
+int mhl_detect_register_notifier(struct t_mhl_status_notifier *);
+static LIST_HEAD(g_lh_mhl_detect_notifier_list);
+/* END: add USB connected notify function */
 #else
 static inline void msm_hsusb_set_vbus_state(int online) {}
 #endif
