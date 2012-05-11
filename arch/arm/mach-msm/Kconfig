@@ -752,11 +752,14 @@ config MSM_AMSS_VERSION
 	default 6210 if MSM_AMSS_VERSION_6210
 	default 6220 if MSM_AMSS_VERSION_6220
 	default 6225 if MSM_AMSS_VERSION_6225
-
+	default 4735 if MSM_AMSS_VERSION_4735
 choice
 	prompt "AMSS modem firmware version"
 
 	default MSM_AMSS_VERSION_6225
+
+        config MSM_AMSS_VERSION_4735
+                bool "4.7.25 + SBA 3001"
 
 	config MSM_AMSS_VERSION_6210
 		bool "6.2.10"
