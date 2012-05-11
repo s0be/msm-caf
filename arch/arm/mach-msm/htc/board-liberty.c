@@ -1122,7 +1122,8 @@ static void __init liberty_init(void)
 	/*
 	 * Setup common MSM GPIOS
 	 */
-	config_gpios();
+	//config_gpios();
+	liberty_init_gpiomux();
 
 	/* We need to set this pin to 0 only once on power-up; we will
 	 * not actually enable the chip until we apply power to it via

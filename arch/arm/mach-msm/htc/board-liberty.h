@@ -141,7 +141,7 @@
 #define LIBERTY_GPIO_LCD_ID1             (58)
 #define LIBERTY_GPIO_LCD_VSYNC           (97)
 #define LIBERTY_GPIO_LCD_RST_N           (118)
-
+int __init liberty_init_gpiomux(void);
 int __init liberty_init_keypad(void);
 int liberty_init_mmc(unsigned int sys_rev);
 int __init liberty_init_panel(void);

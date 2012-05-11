@@ -15,255 +15,113 @@
 
 /* Control bluetooth power for liberty platform */
 
-#include <linux/platform_device.h>
-#include <linux/module.h>
-#include <linux/device.h>
-#include <linux/rfkill.h>
 #include <linux/delay.h>
-#include <linux/gpio.h>
+#include <linux/device.h>
+#include <linux/module.h>
+#include <linux/platform_device.h>
+#include <linux/rfkill.h>
+#include <mach/gpio.h>
+#include <mach/gpiomux.h>
 #include <asm/mach-types.h>
-
-#include "gpio_chip.h"
-#include "proc_comm.h"
+//#include "../gpio_chip.h"
 #include "board-liberty.h"
 
 static struct rfkill *bt_rfk;
 static const char bt_name[] = "bcm4329";
 
-/* bt initial configuration */
-static uint32_t liberty_bt_init_table[] = {
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_RTS, /* BT_RTS */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_CTS, /* BT_CTS */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_RX, /* BT_RX */
-				0,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_TX, /* BT_TX */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_8MA),
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_RESET_N, /* BT_RESET_N */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_4MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_SHUTDOWN_N, /* BT_SHUTDOWN_N */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_4MA),
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_HOST_WAKE, /* BT_HOST_WAKE */
-				0,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_4MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_CHIP_WAKE, /* BT_CHIP_WAKE */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_4MA),
-};
-
-/* bt on configuration */
-static uint32_t liberty_bt_on_table[] = {
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_RTS, /* BT_RTS */
-				2,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_CTS, /* BT_CTS */
-				2,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_RX, /* BT_RX */
-				2,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_TX, /* BT_TX */
-				3,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_8MA),
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_HOST_WAKE, /* BT_HOST_WAKE */
-				0,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_4MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_CHIP_WAKE, /* BT_CHIP_WAKE */
-				0,
-				GPIO_OUTPUT,
-				GPIO_PULL_UP,
-				GPIO_4MA),
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_RESET_N, /* BT_RESET_N */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_4MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_SHUTDOWN_N, /* BT_SHUTDOWN_N */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_4MA),
-};
-
-/* bt off configuration */
-static uint32_t liberty_bt_off_table[] = {
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_RTS, /* BT_RTS */
-				0,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_CTS, /* BT_CTS */
-				0,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_RX, /* BT_RX */
-				0,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_8MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_UART1_TX, /* BT_TX */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_8MA),
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_RESET_N, /* BT_RESET_N */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_4MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_SHUTDOWN_N, /* BT_SHUTDOWN_N */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_4MA),
-
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_HOST_WAKE, /* BT_HOST_WAKE */
-				0,
-				GPIO_INPUT,
-				GPIO_PULL_UP,
-				GPIO_4MA),
-	PCOM_GPIO_CFG(LIBERTY_GPIO_BT_CHIP_WAKE, /* BT_CHIP_WAKE */
-				0,
-				GPIO_OUTPUT,
-				GPIO_NO_PULL,
-				GPIO_4MA),
-};
-
-static void config_bt_table(uint32_t *table, int len)
-{
-	int n;
-	unsigned id;
-	for (n = 0; n < len; n++) {
-		id = table[n];
-		msm_proc_comm(PCOM_RPC_GPIO_TLMM_CONFIG_EX, &id, 0);
-	}
-}
-
 static void liberty_config_bt_init(void)
 {
-	/* set bt initial configuration*/
-	config_bt_table(liberty_bt_init_table,
-				ARRAY_SIZE(liberty_bt_init_table));
-	mdelay(5);
+	/* 
+	 * Only _get gpios that need to go into the active state and remain there.
+	 * Don't touch gpios that need to toggle during init. Most of the init table
+	 * was just dummy entries anyways... gpiomux now handles puting gpio pins 
+	 * into a default state during init.
+	 * */
 
 	/* BT_RTS */
-	gpio_configure(LIBERTY_GPIO_BT_UART1_RTS,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_HIGH);
-
 	/* BT_CTS */
-	gpio_configure(LIBERTY_GPIO_BT_UART1_CTS,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
-
 	/* BT_RX */
-
 	/* BT_TX */
-	gpio_configure(LIBERTY_GPIO_BT_UART1_TX,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_HIGH);
-
 	/* BT_RESET_N */
-	gpio_configure(LIBERTY_GPIO_BT_RESET_N,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
-	mdelay(2);
 	/* BT_SHUTDOWN_N */
-	gpio_configure(LIBERTY_GPIO_BT_SHUTDOWN_N,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
-	mdelay(2);
-
 	/* BT_CHIP_WAKE */
-	gpio_configure(LIBERTY_GPIO_BT_CHIP_WAKE,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_HIGH);
 
 }
 
-static void liberty_config_bt_on(void)
+static int liberty_config_bt_on(void)
 {
+	int rc = 0;
 	/* set bt on configuration*/
-	config_bt_table(liberty_bt_on_table,
-				ARRAY_SIZE(liberty_bt_on_table));
-	mdelay(5);
+	rc = msm_gpiomux_get(LIBERTY_GPIO_BT_UART1_RTS);
+	if(rc)
+		goto err_bt_uart1_rts;
+	mdelay(2);
 
-	/* BT_RESET_N */
-	gpio_configure(LIBERTY_GPIO_BT_RESET_N,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_HIGH);
+	rc = msm_gpiomux_get(LIBERTY_GPIO_BT_UART1_CTS);
+	if(rc)
+		goto err_bt_uart1_cts;
 	mdelay(2);
-	/* BT_SHUTDOWN_N */
-	gpio_configure(LIBERTY_GPIO_BT_SHUTDOWN_N,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_HIGH);
+
+	rc = msm_gpiomux_get(LIBERTY_GPIO_BT_UART1_RX);
+	if(rc)
+		goto err_bt_uart1_rx;
 	mdelay(2);
+
+	rc = msm_gpiomux_get(LIBERTY_GPIO_BT_UART1_TX);
+	if(rc)
+		goto err_bt_uart1_tx;
+	mdelay(2);
+
+	rc = msm_gpiomux_get(LIBERTY_GPIO_BT_CHIP_WAKE);
+	if(rc)
+		goto err_bt_chip_wake;
+	mdelay(2);
+
+	rc = msm_gpiomux_get(LIBERTY_GPIO_BT_RESET_N);
+	if(rc)
+		goto err_bt_reset_n;
+	mdelay(2);
+
+	rc = msm_gpiomux_get(LIBERTY_GPIO_BT_SHUTDOWN_N);
+	if(rc)
+		goto err_bt_shutdown_n;
+	mdelay(2);
+
+	return 0;
+
+err_bt_shutdown_n:
+	msm_gpiomux_put(LIBERTY_GPIO_BT_RESET_N);
+err_bt_reset_n:
+	msm_gpiomux_put(LIBERTY_GPIO_BT_CHIP_WAKE);
+err_bt_chip_wake:
+	msm_gpiomux_put(LIBERTY_GPIO_BT_UART1_TX);
+err_bt_uart1_tx:
+	msm_gpiomux_put(LIBERTY_GPIO_BT_UART1_RX);
+err_bt_uart1_rx:
+	msm_gpiomux_put(LIBERTY_GPIO_BT_UART1_CTS);
+err_bt_uart1_cts:
+	msm_gpiomux_put(LIBERTY_GPIO_BT_UART1_RTS);
+err_bt_uart1_rts:
+	return rc;
 }
 
 static void liberty_config_bt_off(void)
 {
 	/* BT_SHUTDOWN_N */
-	gpio_configure(LIBERTY_GPIO_BT_SHUTDOWN_N,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
+	msm_gpiomux_put(LIBERTY_GPIO_BT_SHUTDOWN_N);
 	mdelay(2);
-	/* BT_RESET_N */
-	gpio_configure(LIBERTY_GPIO_BT_RESET_N,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
+	msm_gpiomux_put(LIBERTY_GPIO_BT_RESET_N);
 	mdelay(2);
-
-	/* set bt off configuration*/
-	config_bt_table(liberty_bt_off_table,
-				ARRAY_SIZE(liberty_bt_off_table));
-	mdelay(5);
-
-	/* BT_RTS */
-	
-	/* BT_CTS */
-
-	/* BT_TX */
-	gpio_configure(LIBERTY_GPIO_BT_UART1_TX,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
-	/* BT_RX */
-
-	/* BT_HOST_WAKE */
-
-	/* BT_CHIP_WAKE */
-	gpio_configure(LIBERTY_GPIO_BT_CHIP_WAKE,
-				GPIOF_DRIVE_OUTPUT | GPIOF_OUTPUT_LOW);
+	msm_gpiomux_put(LIBERTY_GPIO_BT_UART1_RTS);
+        mdelay(2);
+        msm_gpiomux_put(LIBERTY_GPIO_BT_UART1_CTS);
+        mdelay(2);
+        msm_gpiomux_put(LIBERTY_GPIO_BT_UART1_RX);
+        mdelay(2);	
+	msm_gpiomux_put(LIBERTY_GPIO_BT_UART1_TX);
+        mdelay(2);	
+	msm_gpiomux_put(LIBERTY_GPIO_BT_CHIP_WAKE);
+        mdelay(2);	
 }
 
 #if 1
@@ -385,7 +243,7 @@ static struct platform_driver liberty_rfkill_driver = {
 
 static int __init liberty_rfkill_init(void)
 {
-	if (!machine_is_liberty())
+	if (!machine_is_msm7x27_liberty())
 		return 0;
 
 	return platform_driver_register(&liberty_rfkill_driver);
