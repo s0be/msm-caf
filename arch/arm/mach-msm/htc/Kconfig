@@ -12,3 +12,11 @@ config MACH_MSM7X27_MARVEL
 	bool "MSM7x27 Marvel"
 	help
 	  Support for the HTC Marvel board
+
+config MACH_MSM7X27_LIBERTY
+	depends on ARCH_MSM7X27
+	depends on !MSM_STACKED_MEMORY
+	select MACH_HTC_MSM7X27
+	bool "MSM7x27 Liberty"
+	help
+	  Support for the HTC Liberty board
