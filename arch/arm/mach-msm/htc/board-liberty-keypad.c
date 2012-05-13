@@ -58,10 +58,12 @@ static const unsigned short liberty_keymap[ARRAY_SIZE(liberty_col_gpios) *
 	[KEYMAP_INDEX(2, 2)] = BTN_MOUSE, /* OJ_ACTION */
 };
 
+#if 0
 static void liberty_matrix_inputs_gpio(void)
 {
 	/* Handled by gpiomux */
 }
+#endif
 
 static struct gpio_event_matrix_info liberty_keypad_matrix_info = {
 	.info.func = gpio_event_matrix_func,
@@ -71,15 +73,15 @@ static struct gpio_event_matrix_info liberty_keypad_matrix_info = {
 	.input_gpios = liberty_row_gpios,
 	.noutputs = ARRAY_SIZE(liberty_col_gpios),
 	.ninputs = ARRAY_SIZE(liberty_row_gpios),
-	.settle_time.tv.nsec = 40 * NSEC_PER_USEC,
-	.poll_time.tv.nsec = 20 * NSEC_PER_MSEC,
-	.debounce_delay.tv.nsec = 5 * NSEC_PER_MSEC,
+	.settle_time.tv_nsec = 40 * NSEC_PER_USEC,
+	.poll_time.tv_nsec = 20 * NSEC_PER_MSEC,
+	.debounce_delay.tv_nsec = 5 * NSEC_PER_MSEC,
 	.flags = (GPIOKPF_LEVEL_TRIGGERED_IRQ |
 		  GPIOKPF_REMOVE_PHANTOM_KEYS |
 		  GPIOKPF_PRINT_UNMAPPED_KEYS /*|
 		   GPIOKPF_PRINT_MAPPED_KEYS */),
-	.setup_ninputs_gpio = liberty_matrix_inputs_gpio,
-	.detect_phone_status = 0,
+//	.setup_ninputs_gpio = liberty_matrix_inputs_gpio,
+//	.detect_phone_status = 0,
 };
 
 static struct gpio_event_direct_entry liberty_keypad_nav_map[] = {
@@ -89,21 +91,23 @@ static struct gpio_event_direct_entry liberty_keypad_nav_map[] = {
 	},
 };
 
+#if 0
 static void liberty_direct_inputs_gpio(void)
 {
 	/* Handled by gpiomux now */
 }
-
+#endif
 
 static struct gpio_event_input_info liberty_keypad_power_info = {
 	.info.func = gpio_event_input_func,
 	.info.no_suspend = true,
 	.flags = GPIOEDF_PRINT_KEYS,
 	.type = EV_KEY,
-	.debounce_time.tv.nsec = 5 * NSEC_PER_MSEC,
+	/* This should probably not be ktime_t type? */
+	.debounce_time.tv64 = 5 * NSEC_PER_MSEC,
 	.keymap = liberty_keypad_nav_map,
 	.keymap_size = ARRAY_SIZE(liberty_keypad_nav_map),
-	.setup_input_gpio = liberty_direct_inputs_gpio,
+//	.setup_input_gpio = liberty_direct_inputs_gpio,
 };
 
 static struct gpio_event_info *liberty_keypad_info[] = {
