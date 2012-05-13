@@ -303,6 +303,51 @@ static struct msm_gpiomux_config liberty_keypad_hardwired_configs[] __initdata =
         },
 };
 
+/* Liberty Panel */
+static struct gpiomux_setting liberty_panel_lcd_id0 = {
+        .func = GPIOMUX_FUNC_GPIO,
+        .drv = GPIOMUX_DRV_2MA,
+        .pull = GPIOMUX_PULL_NONE,
+        .dir = GPIOMUX_IN,
+};
+
+static struct gpiomux_setting liberty_panel_lcd_id1 = {
+        .func = GPIOMUX_FUNC_GPIO,
+        .drv = GPIOMUX_DRV_2MA,
+        .pull = GPIOMUX_PULL_NONE,
+        .dir = GPIOMUX_IN,
+};
+
+static struct gpiomux_setting liberty_panel_lcd_vsync = {
+	.func = GPIOMUX_FUNC_1,
+	.drv = GPIOMUX_DRV_2MA,
+	.pull = GPIOMUX_PULL_DOWN,
+	.dir = GPIOMUX_IN,
+};
+
+static struct msm_gpiomux_config liberty_panel_configs[] __initdata = {
+	{
+                .gpio = LIBERTY_GPIO_LCD_ID0,
+                .settings = {
+                        [GPIOMUX_SUSPENDED] = &liberty_panel_lcd_id0,
+                },
+        },
+        {
+                .gpio = LIBERTY_GPIO_LCD_ID1,
+                .settings = {
+                        [GPIOMUX_SUSPENDED] = &liberty_panel_lcd_id1,
+                },
+        },
+	{
+		.gpio = LIBERTY_GPIO_LCD_VSYNC,
+		.settings = {
+			[GPIOMUX_SUSPENDED] = &liberty_panel_lcd_vsync,
+		},
+	},
+};
+
+
+
 int __init liberty_init_gpiomux(void)
 {
         int rc = msm_gpiomux_init(NR_GPIO_IRQS);
@@ -319,6 +364,9 @@ int __init liberty_init_gpiomux(void)
 
 	msm_gpiomux_install(liberty_keypad_hardwired_configs,
 			ARRAY_SIZE(liberty_keypad_hardwired_configs));
+
+	msm_gpiomux_install(liberty_panel_configs,
+			ARRAY_SIZE(liberty_panel_configs));
 
 	return 0;
 }

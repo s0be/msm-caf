@@ -28,6 +28,7 @@
 
 #include <mach/msm_fb.h>
 #include <mach/vreg.h>
+#include <mach/pmic.h>
 
 #include "devices.h"
 #include "board-liberty.h"
@@ -113,6 +114,7 @@ liberty_panel_blank(struct msm_mddi_bridge_platform_data *bridge_data,
 	return 0;
 }
 
+#if 0
 static int
 liberty_panel_shrink(int brightness)
 {
@@ -126,6 +128,7 @@ liberty_panel_shrink(int brightness)
 
 	return brightness;
 }
+#endif
 
 static int liberty_panel_shutdown(
                 struct msm_mddi_bridge_platform_data *bridge_data,
@@ -143,12 +146,15 @@ static void panel_eid_fixup(uint16_t *mfr_name, uint16_t *product_code)
 	*product_code = 0x0;
 }
 
+#if 0
 static u8 pwm_eid[10] = {8, 16, 34, 61, 96, 138, 167, 195, 227, 255};
+#endif
 
 static struct msm_mddi_bridge_platform_data eid_client_data = {
 	.blank = liberty_panel_blank,
 	.unblank = liberty_panel_unblank,
-	.shutdown = liberty_panel_shutdown,
+	/* todo... .init? */
+	.uninit = liberty_panel_shutdown,
 	.fb_data = {
 		.xres = 320,
 		.yres = 480,
@@ -166,12 +172,15 @@ static struct resource resources_msm_fb[] = {
 	},
 };
 
+#if 0
+/* It does not look like the mdp driver in 3.0.8 uses a pdata */
 static struct msm_mdp_platform_data liberty_mdp_pdata = {
 	.tearing_check = 1,
 	.sync_config = 0x40380264,
 	.sync_thresh = 0x5008a,
 	.sync_start_pos = 0x12,
 };
+#endif
 
 static struct msm_mddi_platform_data liberty_pdata = {
 	.clk_rate = 106000000,
@@ -206,9 +215,7 @@ int __init liberty_init_panel(void)
 	int rc;
 	int panel_type = 0;
 	int panel_id = -1;
-	int gpio_lcd_id0, gpio_lcd_id1;
-	uint32_t config;
-	struct panel_data *panel_data = &eid_client_data.panel_conf;
+//	struct panel_data *panel_data = &eid_client_data.panel_conf;
 
 	B(KERN_INFO "%s: enter.\n", __func__);
 
@@ -219,11 +226,6 @@ int __init liberty_init_panel(void)
 	vreg_lcm_2v85 = vreg_get(0, "rfrx2");
 	if (IS_ERR(vreg_lcm_2v85))
 		return PTR_ERR(vreg_lcm_2v85);
-
-	gpio_lcd_id0 =  PCOM_GPIO_CFG(LIBERTY_GPIO_LCD_ID0, 0, GPIO_INPUT, GPIO_NO_PULL, GPIO_2MA);
-	gpio_lcd_id1 =  PCOM_GPIO_CFG(LIBERTY_GPIO_LCD_ID1, 0, GPIO_INPUT, GPIO_NO_PULL, GPIO_2MA);
-	msm_proc_comm(PCOM_RPC_GPIO_TLMM_CONFIG_EX, &gpio_lcd_id0, 0);
-	msm_proc_comm(PCOM_RPC_GPIO_TLMM_CONFIG_EX, &gpio_lcd_id1, 0);
 
 	panel_id = gpio_get_value(LIBERTY_GPIO_LCD_ID0) |
 	           (gpio_get_value(LIBERTY_GPIO_LCD_ID1) << 1);
@@ -241,18 +243,16 @@ int __init liberty_init_panel(void)
 			return -1;
 		break;
 	}
-
+/*
 	panel_data->panel_id = panel_type;
 	panel_data->caps = MSMFB_CAP_CABC;
 	panel_data->pwm = pwm_eid;
 	panel_data->shrink = 1;
 	panel_data->shrink_br = liberty_panel_shrink;
 	panel_data->default_br = 83;
+ */
 
-	config = PCOM_GPIO_CFG(LIBERTY_GPIO_LCD_VSYNC, 1, GPIO_INPUT, GPIO_PULL_DOWN, GPIO_2MA);
-	msm_proc_comm(PCOM_RPC_GPIO_TLMM_CONFIG_EX, &config, 0);
-
-	msm_device_mdp.dev.platform_data = &liberty_mdp_pdata;
+//	msm_device_mdp.dev.platform_data = &liberty_mdp_pdata;
 	rc = platform_device_register(&msm_device_mdp);
 	if (rc)
 		return rc;
