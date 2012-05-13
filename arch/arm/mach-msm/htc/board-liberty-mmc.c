@@ -27,6 +27,7 @@
 
 #include <mach/vreg.h>
 #include <mach/htc_pwrsink.h>
+#include <mach/gpiomux.h>
 
 #include "devices.h"
 #include "board-liberty.h"
@@ -38,26 +39,17 @@
 
 /* #include <linux/irq.h> */
 
-extern int msm_add_sdcc(unsigned int controller, struct mmc_platform_data *plat,
-			unsigned int stat_irq, unsigned long stat_irq_flags);
+//extern int msm_add_sdcc(unsigned int controller, struct mmc_platform_data *plat,
+//			unsigned int stat_irq, unsigned long stat_irq_flags);
 
 /* ---- SDCARD ---- */
-static uint32_t sdcard_on_gpio_table[] = {
-	PCOM_GPIO_CFG(62, 2, GPIO_OUTPUT, GPIO_NO_PULL, GPIO_6MA), /* CLK */
-	PCOM_GPIO_CFG(63, 2, GPIO_OUTPUT, GPIO_PULL_UP, GPIO_8MA), /* CMD */
-	PCOM_GPIO_CFG(64, 2, GPIO_OUTPUT, GPIO_PULL_UP, GPIO_8MA), /* DAT3 */
-	PCOM_GPIO_CFG(65, 2, GPIO_OUTPUT, GPIO_PULL_UP, GPIO_8MA), /* DAT2 */
-	PCOM_GPIO_CFG(66, 2, GPIO_OUTPUT, GPIO_PULL_UP, GPIO_8MA), /* DAT1 */
-	PCOM_GPIO_CFG(67, 2, GPIO_OUTPUT, GPIO_PULL_UP, GPIO_8MA), /* DAT0 */
-};
-
-static uint32_t sdcard_off_gpio_table[] = {
-	PCOM_GPIO_CFG(62, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_4MA), /* CLK */
-	PCOM_GPIO_CFG(63, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_4MA), /* CMD */
-	PCOM_GPIO_CFG(64, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_4MA), /* DAT3 */
-	PCOM_GPIO_CFG(65, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_4MA), /* DAT2 */
-	PCOM_GPIO_CFG(66, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_4MA), /* DAT1 */
-	PCOM_GPIO_CFG(67, 0, GPIO_OUTPUT, GPIO_PULL_DOWN, GPIO_4MA), /* DAT0 */
+static uint32_t sdcard_gpio_table[] = { 
+	62, /* CLK */
+	63, /* CMD */
+	64, /* DAT3 */
+	65, /* DAT2 */
+	66, /* DAT1 */
+	67, /* DAT0 */
 };
 
 static uint opt_disable_sdcard;
@@ -87,6 +79,21 @@ static struct mmc_vdd_xlat mmc_vdd_table[] = {
 static unsigned int sdslot_vdd = 0xffffffff;
 static unsigned int sdslot_vreg_enabled;
 
+static void toggle_gpiotable(uint32_t *table, int len, int on)
+{
+	int i;
+	int rc;
+	for(i = 0; i < len; i++) {
+		if(on)
+			rc = msm_gpiomux_get(table[i]);
+			if(rc)
+				printk(KERN_INFO "%s: Error upping gpio %i in sdcard\n",
+					__func__, table[i]);
+		else
+			msm_gpiomux_put(table[i]);
+	}
+}
+
 static uint32_t liberty_sdslot_switchvdd(struct device *dev, unsigned int vdd)
 {
 	int i;
@@ -102,8 +109,7 @@ static uint32_t liberty_sdslot_switchvdd(struct device *dev, unsigned int vdd)
 		printk(KERN_INFO "%s: Disabling SD slot power\n", __func__);
 		writel(MCI_PWR_OFF, MSM_SDC2_BASE + MMCIPOWER);
 		mdelay(1);
-		config_gpio_table(sdcard_off_gpio_table,
-				  ARRAY_SIZE(sdcard_off_gpio_table));
+		toggle_gpiotable(sdcard_gpio_table, ARRAY_SIZE(sdcard_gpio_table), 0);
 		vreg_disable(vreg_sdslot);
 		sdslot_vreg_enabled = 0;
 		return 0;
@@ -143,8 +149,7 @@ static uint32_t liberty_sdslot_switchvdd(struct device *dev, unsigned int vdd)
 		mdelay(5);
 
 		/* ..then, config GPIO */
-		config_gpio_table(sdcard_on_gpio_table,
-				  ARRAY_SIZE(sdcard_on_gpio_table));
+		toggle_gpiotable(sdcard_gpio_table, ARRAY_SIZE(sdcard_gpio_table), 1);
 		sdslot_vreg_enabled = 1;
 		return 0;
 	}
@@ -171,7 +176,7 @@ static struct mmc_platform_data liberty_sdslot_data = {
 	.status_irq	= MSM_GPIO_TO_INT(LIBERTY_GPIO_SDMC_CD_N),
 	.status		= liberty_sdslot_status,
 	.translate_vdd	= liberty_sdslot_switchvdd,
-	.slot_type	= &liberty_sdslot_type,
+//	.slot_type	= &liberty_sdslot_type,
 };
 
 /* ---- WIFI ---- */

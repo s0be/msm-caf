@@ -346,7 +346,135 @@ static struct msm_gpiomux_config liberty_panel_configs[] __initdata = {
 	},
 };
 
+/* SD Card */
+static struct gpiomux_setting liberty_sdc_clk_act = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_6MA,
+	.pull = GPIOMUX_PULL_NONE,
+	.dir = GPIOMUX_OUT_HIGH,
+};
 
+static struct gpiomux_setting liberty_sdc_clk_sus = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_4MA,
+	.pull = GPIOMUX_PULL_DOWN,
+	.dir = GPIOMUX_OUT_LOW,
+};
+
+static struct gpiomux_setting liberty_sdc_cmd_act = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_8MA,
+	.pull = GPIOMUX_PULL_UP,
+	.dir = GPIOMUX_OUT_HIGH,
+};
+
+static struct gpiomux_setting liberty_sdc_cmd_sus = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_4MA,
+	.pull = GPIOMUX_PULL_DOWN,
+	.dir = GPIOMUX_OUT_LOW,
+};
+
+static struct gpiomux_setting liberty_sdc_dat3_act = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_8MA,
+	.pull = GPIOMUX_PULL_UP,
+	.dir = GPIOMUX_OUT_HIGH,
+};
+
+static struct gpiomux_setting liberty_sdc_dat3_sus = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_4MA,
+	.pull = GPIOMUX_PULL_DOWN,
+	.dir = GPIOMUX_OUT_LOW,
+};
+
+static struct gpiomux_setting liberty_sdc_dat2_act = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_8MA,
+	.pull = GPIOMUX_PULL_UP,
+	.dir = GPIOMUX_OUT_HIGH,
+};
+
+static struct gpiomux_setting liberty_sdc_dat2_sus = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_4MA,
+	.pull = GPIOMUX_PULL_DOWN,
+	.dir = GPIOMUX_OUT_LOW,
+};
+
+static struct gpiomux_setting liberty_sdc_dat1_act = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_8MA,
+	.pull = GPIOMUX_PULL_UP,
+	.dir = GPIOMUX_OUT_HIGH,
+};
+
+static struct gpiomux_setting liberty_sdc_dat1_sus = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_4MA,
+	.pull = GPIOMUX_PULL_DOWN,
+	.dir = GPIOMUX_OUT_LOW,
+};
+
+static struct gpiomux_setting liberty_sdc_dat0_act = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_8MA,
+	.pull = GPIOMUX_PULL_DOWN,
+	.dir = GPIOMUX_OUT_HIGH,
+};
+
+static struct gpiomux_setting liberty_sdc_dat0_sus = {
+	.func = GPIOMUX_FUNC_GPIO,
+	.drv = GPIOMUX_DRV_4MA,
+	.pull = GPIOMUX_PULL_DOWN,
+	.dir = GPIOMUX_OUT_LOW,
+};
+
+static struct msm_gpiomux_config liberty_sdcard_configs[] __initdata = {
+        {
+                .gpio = 62,
+                .settings = {
+			[GPIOMUX_ACTIVE] = &liberty_sdc_clk_act,
+                        [GPIOMUX_SUSPENDED] = &liberty_sdc_clk_sus,
+                },
+        },
+        {
+                .gpio = 63,
+                .settings = {
+			[GPIOMUX_ACTIVE] = &liberty_sdc_cmd_act,
+                        [GPIOMUX_SUSPENDED] = &liberty_sdc_cmd_sus,
+                },
+        },
+        {
+                .gpio = 64,
+                .settings = {
+			[GPIOMUX_ACTIVE] = &liberty_sdc_dat3_act,
+                        [GPIOMUX_SUSPENDED] = &liberty_sdc_dat3_sus,
+                },
+        },
+        {
+                .gpio = 65,
+                .settings = {
+			[GPIOMUX_ACTIVE] = &liberty_sdc_dat2_act,
+                        [GPIOMUX_SUSPENDED] = &liberty_sdc_dat2_sus,
+                },
+        },
+        {
+                .gpio = 66,
+                .settings = {
+			[GPIOMUX_ACTIVE] = &liberty_sdc_dat1_act,
+                        [GPIOMUX_SUSPENDED] = &liberty_sdc_dat1_sus,
+                },
+        },
+        {
+                .gpio = 67,
+                .settings = {
+			[GPIOMUX_ACTIVE] = &liberty_sdc_dat0_act,
+                        [GPIOMUX_SUSPENDED] = &liberty_sdc_dat0_sus,
+                },
+        },
+};
 
 int __init liberty_init_gpiomux(void)
 {
@@ -367,6 +495,9 @@ int __init liberty_init_gpiomux(void)
 
 	msm_gpiomux_install(liberty_panel_configs,
 			ARRAY_SIZE(liberty_panel_configs));
+
+	msm_gpiomux_install(liberty_sdcard_configs,
+			ARRAY_SIZE(liberty_sdcard_configs));
 
 	return 0;
 }
