@@ -11,16 +11,16 @@
 static struct gpiomux_setting liberty_bt_uart1_rts_act = {
 	.func = GPIOMUX_FUNC_2,
 	.drv = GPIOMUX_DRV_8MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_OUT_HIGH,
 };
 
 static struct gpiomux_setting liberty_bt_uart1_rts_sus = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_8MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_IN,
-}
+};
 
 /* LIBERTY_GPIO_BT_UART1_CTS */
 static struct gpiomux_setting liberty_bt_uart1_cts_act = {
@@ -33,7 +33,7 @@ static struct gpiomux_setting liberty_bt_uart1_cts_act = {
 static struct gpiomux_setting liberty_bt_uart1_cts_sus = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_8MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_IN,
 };
 
@@ -56,14 +56,14 @@ static struct gpiomux_setting liberty_bt_uart1_rx_sus = {
 static struct gpiomux_setting liberty_bt_uart1_tx_act = {
 	.func = GPIOMUX_FUNC_3,
 	.drv = GPIOMUX_DRV_8MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_OUT_HIGH,
 };
 
 static struct gpiomux_setting liberty_bt_uart1_tx_sus = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_8MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_OUT_LOW,
 };
 
@@ -71,14 +71,14 @@ static struct gpiomux_setting liberty_bt_uart1_tx_sus = {
 static struct gpiomux_setting liberty_bt_reset_n_act = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_4MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_OUT_HIGH,
 };
 
 static struct gpiomux_setting liberty_bt_reset_n_sus = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_4MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_OUT_LOW,
 };
 
@@ -86,14 +86,14 @@ static struct gpiomux_setting liberty_bt_reset_n_sus = {
 static struct gpiomux_setting liberty_bt_shutdown_n_act = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_4MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_OUT_HIGH,
 };
 
 static struct gpiomux_setting liberty_bt_shutdown_n_sus = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_4MA,
-	.pull = GPIOMUX_NO_PULL,
+	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_OUT_LOW,
 };
 
@@ -110,17 +110,17 @@ static struct gpiomux_setting liberty_bt_chip_wake_act = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_4MA,
 	.pull = GPIOMUX_PULL_UP,
-	.dir = GPIOMUX_OUTPUT_HIGH,
+	.dir = GPIOMUX_OUT_HIGH,
 };
 
 static struct gpiomux_setting liberty_bt_chip_wake_sus = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_4MA,
 	.pull = GPIOMUX_PULL_UP,
-	.dir = GPIOMUX_OUTPUT_LOW,
+	.dir = GPIOMUX_OUT_LOW,
 };
 
-static struct msm_gpiomux_config liberty_bt_configs = {
+static struct msm_gpiomux_config liberty_bt_configs[] __initdata = {
 	{
 		.gpio = LIBERTY_GPIO_BT_UART1_RTS,
 		.settings = {
