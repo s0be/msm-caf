@@ -65,7 +65,7 @@ static void liberty_matrix_inputs_gpio(void)
 
 static struct gpio_event_matrix_info liberty_keypad_matrix_info = {
 	.info.func = gpio_event_matrix_func,
-	.info.oj_btn = true,
+//	.info.oj_btn = true,
 	.keymap = liberty_keymap,
 	.output_gpios = liberty_col_gpios,
 	.input_gpios = liberty_row_gpios,
