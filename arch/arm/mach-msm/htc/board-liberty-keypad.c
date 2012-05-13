@@ -60,17 +60,7 @@ static const unsigned short liberty_keymap[ARRAY_SIZE(liberty_col_gpios) *
 
 static void liberty_matrix_inputs_gpio(void)
 {
-	static uint32_t matirx_inputs_gpio_table[] = {
-		PCOM_GPIO_CFG(LIBERTY_GPIO_KP_MKIN0, 0, GPIO_INPUT,
-						GPIO_PULL_UP, GPIO_4MA),
-		PCOM_GPIO_CFG(LIBERTY_GPIO_KP_MKIN1, 0, GPIO_INPUT,
-						GPIO_PULL_UP, GPIO_4MA),
-		PCOM_GPIO_CFG(LIBERTY_GPIO_KP_MKIN2, 0, GPIO_INPUT,
-						GPIO_PULL_UP, GPIO_4MA),
-	};
-
-	config_gpio_table(matirx_inputs_gpio_table,
-		ARRAY_SIZE(matirx_inputs_gpio_table));
+	/* Handled by gpiomux */
 }
 
 static struct gpio_event_matrix_info liberty_keypad_matrix_info = {
@@ -101,15 +91,7 @@ static struct gpio_event_direct_entry liberty_keypad_nav_map[] = {
 
 static void liberty_direct_inputs_gpio(void)
 {
-	static uint32_t matirx_inputs_gpio_table[] = {
-		PCOM_GPIO_CFG(LIBERTY_POWER_KEY, 0, GPIO_INPUT, GPIO_PULL_UP,
-								GPIO_4MA),
-		PCOM_GPIO_CFG(LIBERTY_GPIO_RESET_BTN_N, 0, GPIO_INPUT,
-						GPIO_NO_PULL, GPIO_2MA),
-	};
-
-	config_gpio_table(matirx_inputs_gpio_table,
-		ARRAY_SIZE(matirx_inputs_gpio_table));
+	/* Handled by gpiomux now */
 }
 
 
